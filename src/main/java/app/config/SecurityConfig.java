@@ -1,9 +1,11 @@
 package app.config;
 
 import app.security.JwtAuthenticationFilter;
+import app.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,7 +41,7 @@ public class SecurityConfig {
         this.csrfIgnoreMatcher = csrfIgnoreMatcher;
     }
 
-      private static final String[] PUBLIC_ENDPOINTS = {
+    private static final String[] PUBLIC_ENDPOINTS = {
         "/", "/index.html", "/static/**", "/assets/**",
         "/*.js", "/*.css", "/*.json", "/*.png", "/*.jpg",
         "/*.jpeg", "/*.gif", "/*.svg", "/*.ico",
@@ -49,14 +51,14 @@ public class SecurityConfig {
         "/about",
         "/demo",
         "/login",
-        "/user",
         "/register",
         "/api/auth/login",
         "/api/demo"
     };
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   DaoAuthenticationProvider authProvider) throws Exception {
         http
             .csrf(csrf -> csrf
                 .csrfTokenRepository(csrfTokenRepository)
@@ -71,6 +73,7 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            .authenticationProvider(authProvider) // ✅ register provider
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -78,11 +81,19 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+        return config.getAuthenticationManager(); // ✅ correct way
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService,
+                                                            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+}
 }

@@ -1,6 +1,10 @@
 package app.dto;
 
 import app.security.CustomUserDetails;
+
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 public class UserInfo {
@@ -16,7 +20,7 @@ public class UserInfo {
         this.id = user.getId();
         this.name = user.getName();
         this.email = user.getUsername();
-        this.role = user.getRole();
+        this.role = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
         this.createdAt = user.getCreatedAt() != null ? user.getCreatedAt().toString() : null;
         this.updatedAt = user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null;
     }

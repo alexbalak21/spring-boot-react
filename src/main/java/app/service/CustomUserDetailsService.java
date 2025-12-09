@@ -1,6 +1,5 @@
 package app.service;
 
-import app.model.User;
 import app.repository.UserRepository;
 import app.security.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,17 +25,17 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
+                .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        return new CustomUserDetails(user);
     }
 
     /**
      * Used by JwtAuthenticationFilter when validating JWT (sub = user ID).
      */
     public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
-        User user = userRepository.findById(id)
+        return userRepository.findById(id)
+                .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
-        return new CustomUserDetails(user);
     }
 }

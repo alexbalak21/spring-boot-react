@@ -10,12 +10,13 @@ export function useCsrf() {
 
   useEffect(() => {
     const fetchCsrfToken = async () => {
+      console.log("[useCsrf] Fetching CSRF token...");
       try {
         await axios.get("/api/csrf");
-        console.log("Cookie after CSRF fetch:", document.cookie);
+        console.log("[useCsrf] CSRF token fetched. Cookie:", document.cookie);
         setCsrfReady(true);
       } catch (err) {
-        console.error("Failed to fetch CSRF token", err);
+        console.error("[useCsrf] Failed to fetch CSRF token", err);
       }
     };
     fetchCsrfToken();

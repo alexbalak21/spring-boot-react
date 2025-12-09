@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import styles from "./Login.module.css"; // reuse same styling
-import { useCsrf } from "../hooks/useCsrf"; // adjust path
+import { useEffect, useState, useMemo } from "react";
+import styles from "./Login.module.css"; 
+import { useCsrf } from "../hooks/useCsrf"; 
 import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
 
 const USER_URL = "/user"; // baseURL is already set in useAuthorizedApi
@@ -16,15 +16,22 @@ interface UserInfo {
 
 export default function User() {
   const csrfReady = useCsrf();
-  const api = useAuthorizedApi(); // ✅ use the custom API client
+
+  // ✅ Memoize the API client so it doesn't change every render
+  const api = useMemo(() => useAuthorizedApi(), []);
+
   const [user, setUser] = useState<UserInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!csrfReady) return; // wait until CSRF token is ready
+    if (!csrfReady) {
+      console.log("[User] CSRF not ready yet, skipping fetchUser");
+      return;
+    }
 
     const fetchUser = async () => {
+      console.log("[User] Starting API call to /api/user...");
       try {
         const response = await api.get(USER_URL, {
           headers: {
@@ -32,20 +39,23 @@ export default function User() {
           },
           withCredentials: true,
         });
+        console.log("[User] API call succeeded:", response.data);
         setUser(response.data);
       } catch (err: any) {
+        console.error("[User] API call failed:", err.response?.data || err.message);
         setError(
           err.response?.data?.message ||
             err.response?.data?.error ||
             "Failed to load user info"
         );
       } finally {
+        console.log("[User] API call finished");
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [csrfReady, api]);
+  }, [csrfReady, api]); // ✅ runs only once when csrfReady flips true
 
   return (
     <div className={styles.container}>

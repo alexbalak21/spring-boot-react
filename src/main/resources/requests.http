@@ -1,0 +1,70 @@
+
+@baseUrl = http://localhost:8100/api
+# @baseUrl = https://app-latest-4nnj.onrender.com/api
+@token = ""
+@refreshToken = ""
+
+### REGISTER
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "User",
+    "email": "user@example.com",
+    "password": "password123"
+}
+
+### LOGIN & GET TOKEN
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "password": "password123"
+}
+
+@token = {{login.response.body.token}}
+@refreshToken = {{login.response.body.refreshToken}}
+
+###GET USER DETAILS
+GET {{baseUrl}}/user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###LOGOUT
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###REFRESH TOKEN
+POST {{baseUrl}}/auth/refresh-token
+Content-Type: application/json
+
+{
+    "refreshToken": "{{refreshToken}}"
+}
+
+### Create Issue (using the token from login)
+POST {{baseUrl}}/issues
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Bug in login",
+  "description": "dGVzdA==",
+  "priority": "HIGH",
+  "type": "BUG",
+  "assigneeId": 2,
+  "teamId": 1
+}
+
+### Create Minimal Issue 
+POST {{baseUrl}}/issues
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Bug in login",
+  "description": "hello world"
+}

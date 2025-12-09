@@ -33,6 +33,16 @@ public class PostController {
         return ResponseEntity.ok(postService.getAllPosts());
     }
 
+    @GetMapping("/my-posts")
+    public ResponseEntity<List<Post>> getCurrentUserPosts() {
+        String username = authenticationFacade.getAuthentication().getName();
+        User user = userRepository.findByEmail(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        List<Post> posts = postService.getPostsByUserId(user.getId());
+        System.out.println(posts);
+        return ResponseEntity.ok(posts);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
         return postService.getPostById(id)

@@ -47,13 +47,9 @@ public class SecurityConfig {
         "/*.jpeg", "/*.gif", "/*.svg", "/*.ico",
         "/favicon.ico", "/error",
         "/api/auth/register",
-        "/api/csrf",
-        "/about",
-        "/demo",
-        "/login",
-        "/register",
         "/api/auth/login",
-        "/api/demo"
+        "/api/csrf",
+        "/about", "/demo", "/login", "/register", "/api/demo", "/user"
     };
 
     @Bean
@@ -64,6 +60,7 @@ public class SecurityConfig {
                 .csrfTokenRepository(csrfTokenRepository)
                 .csrfTokenRequestHandler(csrfTokenRequestHandler)
                 .ignoringRequestMatchers(csrfIgnoreMatcher)
+                .ignoringRequestMatchers("/api/**") // ignore CSRF for JWT endpoints
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth -> auth
@@ -73,7 +70,7 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .authenticationProvider(authProvider) // ✅ register provider
+            .authenticationProvider(authProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -81,7 +78,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager(); // ✅ correct way
+        return config.getAuthenticationManager();
     }
 
     @Bean
@@ -92,8 +89,9 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService,
                                                             PasswordEncoder passwordEncoder) {
+        // Constructor requires a UserDetailsService
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
-}
+    }
 }

@@ -23,7 +23,8 @@ public class OriginValidationFilter extends OncePerRequestFilter {
     // Paths that ALWAYS require origin validation (must match allowed origin)
     private static final String[] STRICT_PROTECTED_PATHS = {
         "/api/auth/login",
-        "/api/auth/register"
+        "/api/auth/register",
+        "/api/csrf"
     };
 
     // Paths that only validate origin if it's present
@@ -59,19 +60,36 @@ public class OriginValidationFilter extends OncePerRequestFilter {
             }
         }
         
-        // STRICT: /api/auth/login and /api/auth/register MUST have valid origin
+        // STRICT: /api/auth/login, /api/auth/register and /api/csrf
+        // Allow if:
+        // 1. Request has Origin header that equals allowedOrigin (cross-origin from frontend), OR
+        // 2. Request has NO Origin header AND Referer indicates same-origin (same-origin requests from pages served by this server)
         if (isStrictProtectedPath) {
-            if (origin == null) {
-                logger.warn("Rejected request to " + requestPath + " - no Origin header present");
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("Origin header is required");
-                return;
+            String referer = request.getHeader("Referer");
+            String scheme = request.getScheme();
+            String serverOrigin = scheme + "://" + request.getServerName();
+            int port = request.getServerPort();
+            if (!(("http".equalsIgnoreCase(scheme) && port == 80) || ("https".equalsIgnoreCase(scheme) && port == 443))) {
+                serverOrigin += ":" + port;
             }
-            if (!origin.equals(allowedOrigin)) {
-                logger.warn("Rejected request from unauthorized origin: " + origin + " for path: " + requestPath + ". Allowed origin: " + allowedOrigin);
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("Origin not allowed");
-                return;
+
+            if (origin != null) {
+                // Cross-origin request: Origin header must match allowedOrigin
+                if (!origin.equals(allowedOrigin)) {
+                    logger.warn("Rejected request from unauthorized origin: " + origin + " for path: " + requestPath + ". Allowed origin: " + allowedOrigin);
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("Origin not allowed");
+                    return;
+                }
+            } else {
+                // Same-origin request (no Origin header): verify Referer matches server origin
+                boolean refererMatches = (referer != null) && referer.startsWith(serverOrigin);
+                if (!refererMatches) {
+                    logger.warn("Rejected request to " + requestPath + " - no Origin header and Referer mismatch. referer=" + referer + ", serverOrigin=" + serverOrigin);
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("Origin header is required or Referer must be from same origin");
+                    return;
+                }
             }
         }
         

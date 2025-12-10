@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import styles from "./ApiDemo.module.css";
-import { useCsrf } from "../hooks/useCsrf"; // adjust path to your hook
+import { useCsrf } from "../hooks/useCsrf";
 
 // Axios defaults for XSRF and cookies
 axios.defaults.withCredentials = true;
@@ -40,26 +39,26 @@ export default function ApiDemo() {
   };
 
   return (
-    <div>
+    <div className="app-container">
       <h1>API Demo</h1>
-      <div className={styles.container}>
+      <div className="api-demo-container">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className={styles.input}
+          className="api-demo-input"
         />
         <button
           onClick={handlePost}
-          disabled={loading || !csrfReady} // ✅ block until CSRF ready
-          className={`${styles.button} ${loading ? styles.buttonDisabled : ""}`}
+          disabled={loading || !csrfReady}
+          className="api-demo-button"
         >
           {loading ? "Sending..." : "Send Message"}
         </button>
       </div>
       {responseText && (
-        <div className={styles.responseBox}>
+        <div className="api-demo-response">
           {responseText}
         </div>
       )}

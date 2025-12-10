@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import styles from "./Login.module.css"; // reuse same CSS
-import { useCsrf } from "../hooks/useCsrf"; // adjust path
+import { useCsrf } from "../hooks/useCsrf";
 
 const REGISTER_URL = "/api/auth/register";
 
@@ -63,16 +62,16 @@ export default function Register() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h2 className={styles.title}>Register</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h2 className="login-title">Register</h2>
 
-        {error && <div className={styles.error}>{error}</div>}
-        {registerResult && <div className={styles.success}>{registerResult}</div>}
+        {error && <div className="alert-error">{error}</div>}
+        {registerResult && <div className="alert-success">{registerResult}</div>}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label htmlFor="name" className={styles.label}>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="name" className="form-label">
               Name
             </label>
             <input
@@ -81,14 +80,14 @@ export default function Register() {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={styles.input}
+              className="form-input"
               disabled={isLoading}
               autoComplete="name"
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
               Email
             </label>
             <input
@@ -97,14 +96,14 @@ export default function Register() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={styles.input}
+              className="form-input"
               disabled={isLoading}
               autoComplete="email"
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
               Password
             </label>
             <input
@@ -113,7 +112,7 @@ export default function Register() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={styles.input}
+              className="form-input"
               disabled={isLoading}
               autoComplete="new-password"
             />
@@ -121,10 +120,10 @@ export default function Register() {
 
           <button
             type="submit"
-            className={`${styles.button} ${isLoading ? styles.buttonLoading : ""}`}
+            className={`login-button ${isLoading ? 'login-button-disabled' : ''}`}
             disabled={isLoading || !csrfReady}
           >
-            {isLoading ? "Registering..." : "Register"}
+            {isLoading ? 'Registering...' : 'Register'}
           </button>
         </form>
       </div>

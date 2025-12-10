@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import styles from "./Login.module.css"; 
-import { useCsrf } from "../hooks/useCsrf"; 
+import { useCsrf } from "../hooks/useCsrf";
 import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
 
 const USER_URL = "/user"; // baseURL is already set in useAuthorizedApi
@@ -58,31 +57,31 @@ export default function User() {
   }, [csrfReady, api]); // ✅ runs only once when csrfReady flips true
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h2 className={styles.title}>User Profile</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h2 className="login-title">User Profile</h2>
 
         {loading && <p>Loading user info...</p>}
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <div className="alert-error">{error}</div>}
         {user && (
-          <div className={styles.form}>
-            <div className={styles.formGroup}>
+          <div className="login-form">
+            <div className="form-group">
               <strong>ID:</strong> {user.id}
             </div>
-            <div className={styles.formGroup}>
+            <div className="form-group">
               <strong>Name:</strong> {user.name}
             </div>
-            <div className={styles.formGroup}>
+            <div className="form-group">
               <strong>Email:</strong> {user.email}
             </div>
-            <div className={styles.formGroup}>
+            <div className="form-group">
               <strong>Role:</strong> {user.role}
             </div>
-            <div className={styles.formGroup}>
+            <div className="form-group">
               <strong>Created At:</strong>{" "}
               {new Date(user.createdAt).toLocaleString()}
             </div>
-            <div className={styles.formGroup}>
+            <div className="form-group">
               <strong>Updated At:</strong>{" "}
               {new Date(user.updatedAt).toLocaleString()}
             </div>

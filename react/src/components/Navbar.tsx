@@ -25,38 +25,38 @@ export default function Navbar() {
             <div className="flex-shrink-0 flex items-center">
               <span className="text-xl font-bold text-indigo-600">My App</span>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link 
-                to="/" 
-                className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                  isActive("/")
-                    ? "text-gray-900 border-b-2 border-indigo-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/about"
-                className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                  isActive("/about")
-                    ? "text-gray-900 border-b-2 border-indigo-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                About
-              </Link>
-              <Link
-                to="/demo"
-                className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                  isActive("/demo")
-                    ? "text-gray-900 border-b-2 border-indigo-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                API Demo
-              </Link>
-            </div>
+  <div className="hidden sm:ml-6 sm:flex sm:space-x-8 h-full">
+  <Link
+    to="/"
+    className={`flex items-center px-1 text-sm font-medium border-b-2 h-full ${
+      isActive("/")
+        ? "border-indigo-500 text-gray-900"
+        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+    }`}
+  >
+    Home
+  </Link>
+  <Link
+    to="/about"
+    className={`flex items-center px-1 text-sm font-medium border-b-2 h-full ${
+      isActive("/about")
+        ? "border-indigo-500 text-gray-900"
+        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+    }`}
+  >
+    About
+  </Link>
+  <Link
+    to="/demo"
+    className={`flex items-center px-1 text-sm font-medium border-b-2 h-full ${
+      isActive("/demo")
+        ? "border-indigo-500 text-gray-900"
+        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+    }`}
+  >
+    API Demo
+  </Link>
+</div>
           </div>
 
           {/* Mobile menu button */}

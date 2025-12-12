@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useCsrf } from "../hooks/useCsrf";
 import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
 import { useLogout } from "../hooks/useLogout";
+import Button from "../components/Button";
 
 const USER_URL = "/user"; // baseURL is already set in useAuthorizedApi
 
@@ -64,13 +65,14 @@ export default function User() {
       <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">User Profile</h2>
-          <button
-            className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${logoutLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          <Button
+            variant="danger"
             onClick={() => { if (confirm("Log out now?")) logout(); }}
             disabled={logoutLoading}
+            loading={logoutLoading}
           >
             {logoutLoading ? "Logging out..." : "Logout"}
-          </button>
+          </Button>
         </div>
 
         {loading && <p className="text-gray-600">Loading user info...</p>}

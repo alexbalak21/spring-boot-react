@@ -165,25 +165,38 @@ export default function UpdateUser() {
             />
           </div>
 
-          <div className="flex items-center justify-end space-x-3 pt-4">
-            <Button 
-              type="button" 
-              onClick={() => navigate('/user')}
+          <div className="flex items-center justify-between pt-4">
+            {/* Left side: Change Password */}
+            <Button
+              type="button"
               variant="secondary"
+              onClick={() => navigate('/update-password')}
               className="w-full sm:w-auto"
             >
-              Cancel
+              Change Password
             </Button>
-            <Button 
-              type="submit" 
-              disabled={submitting}
-              className="w-full sm:w-auto"
-            >
-              {submitting ? 'Updating...' : 'Update Profile'}
-            </Button>
+
+            {/* Right side: Cancel + Update Profile */}
+            <div className="flex items-center space-x-3">
+              <Button 
+                type="button" 
+                onClick={() => navigate('/user')}
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={submitting}
+                className="w-full sm:w-auto"
+              >
+                {submitting ? 'Updating...' : 'Update Profile'}
+              </Button>
+            </div>
           </div>
         </form>
-      </div>
+      </div>  
     </div>
   );
 }

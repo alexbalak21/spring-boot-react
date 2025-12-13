@@ -1,5 +1,6 @@
 package app.controller;
 
+import app.dto.UpdatePasswordRequest;
 import app.dto.UpdateUserRequest;
 import app.dto.UserInfo;
 import app.model.User;
@@ -51,11 +52,26 @@ public class UserController {
     @PutMapping("/user/profile")
     public ResponseEntity<UserInfo> updateProfile(@Valid @RequestBody UpdateUserRequest updateRequest) {
         try {
-            User currentUser = userService.getCurrentUser();
+            CustomUserDetails currentUser = userService.getCurrentUser();
             User updatedUser = userService.updateUser(currentUser.getId(), updateRequest);
             return ResponseEntity.ok(new UserInfo(updatedUser));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PutMapping("/user/password")
+    public ResponseEntity<?> updatePassword(@Valid @RequestBody UpdatePasswordRequest passwordRequest) {
+        try {
+            CustomUserDetails currentUser = userService.getCurrentUser();
+            userService.updatePassword(currentUser.getId(), passwordRequest);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An error occurred while updating password");
+        }
+    }
+
+    
 }

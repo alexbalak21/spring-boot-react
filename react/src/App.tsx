@@ -11,6 +11,7 @@ import CreatePost from "./pages/Posts/CreatePost"
 import Posts from "./pages/Posts/Posts"
 import UpdatePost from "./pages/Posts/UpdatePost"
 import ToastContainer from "./components/ToastContainer"
+import UpdateUserPassword from './pages/User/UpdateUserPassword';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/posts" element={<Posts />} />
             <Route path="/edit-post/:id" element={<UpdatePost />} />
+            <Route path="/update-password" element={<UpdateUserPassword />} />
           </Routes>
         </main>
 

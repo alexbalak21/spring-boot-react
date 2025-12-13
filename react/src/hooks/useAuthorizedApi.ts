@@ -1,4 +1,3 @@
-// hooks/useAuthorizedApi.ts
 import axios from "axios";
 import { useMemo } from "react";
 

@@ -127,7 +127,7 @@ export default function Login() {
               value={formData.email}
               onChange={handleChange}
               disabled={isLoading}
-              placeholder="you@example.com"
+              placeholder="your@mail.com"
             />
 
             <Input

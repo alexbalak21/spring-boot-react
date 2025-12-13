@@ -104,6 +104,7 @@ export default function Register() {
               value={formData.name}
               onChange={handleChange}
               disabled={isLoading}
+              placeholder="John Doe"
             />
 
             <Input
@@ -115,6 +116,7 @@ export default function Register() {
               value={formData.email}
               onChange={handleChange}
               disabled={isLoading}
+              placeholder="your@mail.com"
             />
 
             <Input
@@ -126,6 +128,7 @@ export default function Register() {
               value={formData.password}
               onChange={handleChange}
               disabled={isLoading}
+              placeholder="••••••••"
             />
 
             <Button

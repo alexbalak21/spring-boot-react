@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useCsrf } from "../hooks/useCsrf";
 import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
 import { useLogout } from "../hooks/useLogout";
@@ -18,8 +18,8 @@ interface UserInfo {
 export default function User() {
   const csrfReady = useCsrf();
 
-  // ✅ Memoize the API client so it doesn't change every render
-  const api = useMemo(() => useAuthorizedApi(), []);
+  // ✅ Use the authorized API hook directly at the top level
+  const api = useAuthorizedApi();
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const [error, setError] = useState<string | null>(null);

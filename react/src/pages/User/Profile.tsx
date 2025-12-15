@@ -52,7 +52,7 @@ export default function Profile() {
   }, [csrfReady, api]);
 
   return (
-    <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-8 mx-auto">
+    <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">User Profile</h2>
         <div className="flex space-x-2">

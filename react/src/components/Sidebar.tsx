@@ -4,18 +4,21 @@ function classNames(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-const links = [
-  { name: "Profile", href: "/profile" },
-  { name: "Update Profile", href: "/update-profile" },
-  { name: "Update Password", href: "/update-password" },
-];
+export interface SidebarLink {
+  name: string;
+  href: string;
+}
 
-export default function Sidebar() {
+interface SidebarProps {
+  links: SidebarLink[];
+}
+
+export default function Sidebar({ links }: SidebarProps) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 min-h-screen p-4">
+    <aside className="w-64 bg-white border-r border-gray-200 p-4 h-[calc(100vh-65px)]">
       <h2 className="text-lg font-semibold mb-4">User Menu</h2>
       <nav className="space-y-2">
         {links.map((item) => (

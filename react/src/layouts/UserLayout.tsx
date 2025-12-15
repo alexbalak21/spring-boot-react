@@ -1,24 +1,28 @@
-import { Routes, Route } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import Profile from "../pages/User/Profile";
-import UpdateUser from "../pages/User/UpdateUser";
-import UpdateUserPassword from "../pages/User/UpdateUserPassword";
+import type { SidebarLink } from "../components/Sidebar";
 
-export default function UserLayout() {
+interface UserLayoutProps {
+  links: SidebarLink[];
+  position?: "left" | "right"; // default is "right"
+}
+
+export default function UserLayout({ links, position = "left" }: UserLayoutProps) {
   return (
-    <div className="flex flex-1">
-      {/* Sidebar on the left */}
-      <Sidebar />
+    <div className="flex bg-gray-50">
 
-      {/* Main content on the right */}
-      <main className="flex-1 py-6 sm:px-6 lg:px-8">
-        <Routes>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/update-profile" element={<UpdateUser />} />
-          <Route path="/update-password" element={<UpdateUserPassword />} />
-        </Routes>
-      </main>
-      <div className="w-64 hidden lg:block"></div>
+      <div className="w-64">
+        {position === "left" && <Sidebar links={links} />}
+      </div>
+
+      <div className="w-full h-[calc(100vh-65px)] flex items-center justify-center">
+        <Outlet />  
+      </div>
+          
+       
+      <div className="w-64">
+        {position === "right" && <Sidebar links={links} />}
+      </div>
     </div>
   );
 }

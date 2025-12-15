@@ -12,12 +12,18 @@ import UpdateUser from "./pages/User/UpdateUser";
 import UpdateUserPassword from "./pages/User/UpdateUserPassword";
 
 export default function App() {
+  const userLinks = [
+  { name: "Profile", href: "/profile" },
+  { name: "Update Profile", href: "/update-profile" },
+  { name: "Update Password", href: "/update-password" },
+];
+
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="h-screen bg-gray-50 flex flex-col">
         <Navbar />
 
-        <div className="flex flex-1">
+        <div className="w-full h-full">
           <Routes>
             {/* Normal pages without sidebar */}
             <Route path="/" element={<Home />} />
@@ -27,11 +33,11 @@ export default function App() {
             <Route path="/register" element={<Register />} />
 
             {/* User-related pages with sidebar */}
-            <Route element={<UserLayout />}>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/update-profile" element={<UpdateUser />} />
-              <Route path="/update-password" element={<UpdateUserPassword />} />
-            </Route>
+           <Route element={<UserLayout links={userLinks} position="left" />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/update-profile" element={<UpdateUser />} />
+            <Route path="/update-password" element={<UpdateUserPassword />} />
+          </Route>
           </Routes>
         </div>
 

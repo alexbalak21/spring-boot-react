@@ -16,38 +16,38 @@ import java.util.List;
  */
 public class CustomUserDetails implements UserDetails {
 
-    private final Long id;
-    private final String email;
-    private final String name;
-    private final String password;
+    private final User user;  // keep the full User entity
     private final Collection<? extends GrantedAuthority> authorities;
-    private final Instant createdAt;
-    private final Instant updatedAt;
 
     public CustomUserDetails(User user) {
-        this.id = user.getId();
-        this.email = user.getEmail();
-        this.name = user.getName();
-        this.password = user.getPassword();
+        this.user = user;
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-        this.createdAt = user.getCreatedAt() != null ? user.getCreatedAt().toInstant(ZoneOffset.UTC) : null;
-        this.updatedAt = user.getUpdatedAt() != null ? user.getUpdatedAt().toInstant(ZoneOffset.UTC) : null;
     }
 
-    public Long getId() { return id; }
-    public String getEmail() { return email; }
-    public String getName() { return name; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
+    // Expose the full User entity
+    public User getUser() {
+        return user;
+    }
+
+    // Convenience getters
+    public Long getId() { return user.getId(); }
+    public String getEmail() { return user.getEmail(); }
+    public String getName() { return user.getName(); }
+    public Instant getCreatedAt() {
+        return user.getCreatedAt() != null ? user.getCreatedAt().toInstant(ZoneOffset.UTC) : null;
+    }
+    public Instant getUpdatedAt() {
+        return user.getUpdatedAt() != null ? user.getUpdatedAt().toInstant(ZoneOffset.UTC) : null;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
 
     @Override
-    public String getPassword() { return password; }
+    public String getPassword() { return user.getPassword(); }
 
     @Override
-    public String getUsername() { return email; }
+    public String getUsername() { return user.getEmail(); }
 
     @Override
     public boolean isAccountNonExpired() { return true; }

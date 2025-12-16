@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 
-
 interface UserInfo {
   id: number;
   name: string;
@@ -36,14 +35,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           withCredentials: true,
         });
         setUser(res.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch user:", err);
-        setUser(null);
+
+        // If backend says Forbidden, flush everything
+        if (err.response?.status === 403 || err.response?.status === 401) {
+          setUser(null);
+          clearAccessToken();
+        } else {
+          setUser(null);
+        }
       }
     };
 
     fetchUser();
-  }, [accessToken]); // re-run whenever token changes
+  }, [accessToken, clearAccessToken]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

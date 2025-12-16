@@ -1,12 +1,12 @@
 // hooks/useAuthorizedApi.ts
 import axios from "axios";
+import type { AxiosInstance } from "axios"; // 👈 type-only import
 
-export function useAuthorizedApi() {
+export function useAuthorizedApi(): AxiosInstance {
   const api = axios.create({
     baseURL: "/api",
   });
 
-  // Always read the latest token from localStorage
   api.interceptors.request.use((config) => {
     const token = localStorage.getItem("access_token");
     if (token) {
@@ -14,6 +14,17 @@ export function useAuthorizedApi() {
     }
     return config;
   });
+
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("access_token");
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return api;
 }

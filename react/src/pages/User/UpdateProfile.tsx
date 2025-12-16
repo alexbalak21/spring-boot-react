@@ -4,6 +4,7 @@ import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useUser } from "../../context/UserContext";
+import UploadProfileImage from "../../components/UploadProfileImage"; // 👈 import the image upload component
 
 export default function UpdateProfile() {
   const navigate = useNavigate();
@@ -73,6 +74,9 @@ export default function UpdateProfile() {
 
   return (
     <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 min-w-100">
+      {/* 👇 Upload profile image at the top */}
+      <UploadProfileImage api={api} />
+
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Update Profile</h2>
         <p className="mt-2 text-sm text-gray-600">Update your account information</p>

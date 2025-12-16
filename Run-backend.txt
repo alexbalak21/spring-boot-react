@@ -1,0 +1,1 @@
+& 'C:\Users\ALEX\.windsurf\extensions\redhat.java-1.50.0-win32-x64\jre\21.0.9-win32-x86_64\bin\java.exe' '@C:\Users\ALEX\AppData\Local\Temp\cp_5d1cixesaw4ruan2kn4d306r7.argfile' 'app.Application'

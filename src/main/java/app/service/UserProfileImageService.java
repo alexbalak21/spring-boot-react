@@ -26,9 +26,9 @@ public class UserProfileImageService {
         // Compress and resize
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Thumbnails.of(originalImage)
-                  .size(200, 200)       // resize to 200x200
-                  .outputQuality(0.8)   // compress to 80% quality
-                  .outputFormat("jpg")  // force JPEG format
+                  .size(120, 120)       
+                  .outputQuality(0.8)   
+                  .outputFormat("jpg")
                   .toOutputStream(baos);
 
         UserProfileImage profileImage = new UserProfileImage();

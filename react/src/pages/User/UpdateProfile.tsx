@@ -51,7 +51,7 @@ export default function UpdateProfile() {
       // Reset success message after 3 seconds and redirect
       setTimeout(() => {
         setSuccess(false);
-        navigate("/user");
+        navigate("/profile");
       }, 3000);
     } catch (err: any) {
       console.error("Update failed:", err);

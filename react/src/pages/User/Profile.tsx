@@ -36,7 +36,7 @@ export default function Profile() {
           </div>
           <div className="flex gap-4">
             <strong className="w-28 text-gray-700">Role:</strong>
-            <span className="text-gray-900">{user.role}</span>
+            <span className="text-gray-900">{user.roles}</span>
           </div>
           <div className="flex gap-4">
             <strong className="w-28 text-gray-700">Created:</strong>

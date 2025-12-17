@@ -2,6 +2,7 @@ package app.service;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,13 +47,12 @@ public class UserDetailsImpl implements UserDetails {
      */
     public static UserDetailsImpl build(User user) {
         return new UserDetailsImpl(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getPassword(),
-            // Convert the user's role to a Spring Security GrantedAuthority
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-        );
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword(),
+                // Convert the user's role to a Spring Security GrantedAuthority
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
     }
 
     public Long getId() {

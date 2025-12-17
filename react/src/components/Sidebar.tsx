@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {ArrowLeftEndOnRectangleIcon, ArrowRightEndOnRectangleIcon} from "@heroicons/react/24/outline";
+import { ArrowLeftEndOnRectangleIcon, ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
 
 function classNames(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -9,7 +9,9 @@ function classNames(...classes: Array<string | false | null | undefined>) {
 export interface SidebarLink {
   name: string;
   href: string;
+  icon: React.ElementType; // add icon type
 }
+
 
 interface SidebarProps {
   links: SidebarLink[];
@@ -28,16 +30,16 @@ export default function Sidebar({ links }: SidebarProps) {
       )}
     >
       {/* Title only when open */}
-        <div className="flex justify-between">
-          {isOpen && <h2 className="text-lg font-semibold mb-4">User Menu</h2>}
-          <button className={`rounded-md border border-gray-200 hover:bg-gray-100 p-1 mb-4 ${isOpen ? "" : "mx-auto"}`} onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? (
-            <ArrowLeftEndOnRectangleIcon  className="h-5 w-5 text-gray-600" />
+      <div className="flex justify-between">
+        {isOpen && <h2 className="text-lg font-semibold mb-4">User Menu</h2>}
+        <button className={`rounded-md border border-gray-200 hover:bg-gray-100 p-1 mb-4 ${isOpen ? "" : "mx-auto"}`} onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? (
+            <ArrowLeftEndOnRectangleIcon className="h-5 w-5 text-gray-600" />
           ) : (
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 text-gray-600" />
           )}
-          </button>
-        </div>
+        </button>
+      </div>
 
       {/* Navigation */}
       <nav className="space-y-2">
@@ -49,12 +51,14 @@ export default function Sidebar({ links }: SidebarProps) {
               isActive(item.href)
                 ? "bg-indigo-50 text-indigo-600 border-l-4 border-indigo-600"
                 : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-              "block px-3 py-2 rounded-md text-sm font-medium",
-              !isOpen && "text-center px-0" // compact style when collapsed
+              "flex items-center px-3 py-2 rounded-md text-sm font-medium",
+              !isOpen && "justify-center px-0"
             )}
           >
-            {isOpen ? item.name : item.name.charAt(0)} {/* show first letter when collapsed */}
+            <item.icon className="h-5 w-5 mr-2 text-gray-500" aria-hidden="true" />
+            {isOpen && item.name}
           </Link>
+
         ))}
       </nav>
     </aside>

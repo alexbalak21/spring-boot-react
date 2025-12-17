@@ -3,23 +3,25 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon, HomeIcon, InformationCircleIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useUser } from "../context/UserContext";
-import UserMenu from "./UserMenu"; // <-- new component
+import UserMenu from "./UserMenu";
 
 function classNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Navbar() {
+  const { authenticated } = useAuth();
   const { user } = useUser();
   const location = useLocation();
 
   const navigation = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "API Demo", href: "/demo" },
+    { name: "Home", href: "/", icon: HomeIcon },
+    { name: "About", href: "/about", icon: InformationCircleIcon },
+    { name: "API Demo", href: "/demo", icon: CodeBracketIcon },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -60,6 +62,7 @@ export default function Navbar() {
                       "flex items-center h-full px-3 text-sm font-medium border-b-2 transition-colors"
                     )}
                   >
+                    <item.icon className="mr-2 h-5 w-5" aria-hidden="true" />
                     {item.name}
                   </Link>
                 ))}
@@ -104,9 +107,10 @@ export default function Navbar() {
                 isActive(item.href)
                   ? "text-indigo-600 font-semibold bg-gray-50 border-l-4 border-indigo-600"
                   : "text-gray-700 hover:text-indigo-600 hover:border-l-4 hover:border-indigo-600",
-                "block px-3 py-2 text-base font-medium transition-colors w-full"
+                "flex items-center px-3 py-2 text-base font-medium transition-colors w-full"
               )}
             >
+              <item.icon className="mr-2 h-5 w-5" aria-hidden="true" />
               {item.name}
             </DisclosureButton>
           ))}

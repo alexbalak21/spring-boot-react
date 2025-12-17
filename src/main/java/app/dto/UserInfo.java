@@ -21,9 +21,7 @@ public class UserInfo {
         this.id = user.getId();
         this.name = user.getName();
         this.email = user.getUsername();
-        this.roles = user.getAuthorities().stream()
-                         .map(GrantedAuthority::getAuthority)
-                         .collect(Collectors.toList());
+        this.roles = user.getRoles();
         this.createdAt = user.getCreatedAt() != null ? user.getCreatedAt().toString() : null;
         this.updatedAt = user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null;
     }

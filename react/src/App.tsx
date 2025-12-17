@@ -12,43 +12,45 @@ import UpdateProfile from "./pages/User/UpdateProfile";
 import UpdateUserPassword from "./pages/User/UpdateUserPassword";
 import { AuthProvider } from "./context/AuthContext";
 import {UserProvider} from "./context/UserContext";
+import { UserIcon, PencilSquareIcon, KeyIcon } from "@heroicons/react/24/outline";
+
 
 export default function App() {
   const userLinks = [
-  { name: "Profile", href: "/profile" },
-  { name: "Update Profile", href: "/update-profile" },
-  { name: "Update Password", href: "/update-password" },
-];
+    { name: "Profile", href: "/profile", icon: UserIcon },
+    { name: "Update Profile", href: "/update-profile", icon: PencilSquareIcon },
+    { name: "Update Password", href: "/update-password", icon: KeyIcon },
+  ];
 
   return (
     <AuthProvider>
       <UserProvider>
-    <Router>
-      <div className="h-screen bg-gray-50 flex flex-col">
-        <Navbar />
+        <Router>
+          <div className="h-screen bg-gray-50 flex flex-col">
+            <Navbar />
 
-        <div className="flex-1 w-full">
-          <Routes>
-            {/* Normal pages without sidebar */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/demo" element={<ApiDemo />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <div className="flex-1 w-full">
+              <Routes>
+                {/* Normal pages without sidebar */}
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/demo" element={<ApiDemo />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-            {/* User-related pages with sidebar */}
-           <Route element={<UserLayout links={userLinks} position="left" />}>
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/update-profile" element={<UpdateProfile />} />
-            <Route path="/update-password" element={<UpdateUserPassword />} />
-          </Route>
-          </Routes>
-        </div>
+                {/* User-related pages with sidebar */}
+                <Route element={<UserLayout links={userLinks} position="left" />}>
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/update-profile" element={<UpdateProfile />} />
+                  <Route path="/update-password" element={<UpdateUserPassword />} />
+                </Route>
+              </Routes>
+            </div>
 
-        <ToastContainer position="top-right" />
-      </div>
-    </Router>
-    </UserProvider>
-  </AuthProvider>
+            <ToastContainer position="top-right" />
+          </div>
+        </Router>
+      </UserProvider>
+    </AuthProvider>
   );
 }

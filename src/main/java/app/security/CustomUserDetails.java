@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;  // keep the full User entity
+    private final User user; // keep the full User entity
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
@@ -30,34 +30,66 @@ public class CustomUserDetails implements UserDetails {
     }
 
     // Convenience getters
-    public Long getId() { return user.getId(); }
-    public String getEmail() { return user.getEmail(); }
-    public String getName() { return user.getName(); }
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
+    }
+
+    public String getName() {
+        return user.getName();
+    }
+
     public Instant getCreatedAt() {
         return user.getCreatedAt() != null ? user.getCreatedAt().toInstant(ZoneOffset.UTC) : null;
     }
+
     public Instant getUpdatedAt() {
         return user.getUpdatedAt() != null ? user.getUpdatedAt().toInstant(ZoneOffset.UTC) : null;
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    //Returns the pure ROLE
+    public List<String> getRoles() {
+        return authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
+                .toList();
+    }
 
     @Override
-    public String getPassword() { return user.getPassword(); }
+    public String getPassword() {
+        return user.getPassword();
+    }
 
     @Override
-    public String getUsername() { return user.getEmail(); }
+    public String getUsername() {
+        return user.getEmail();
+    }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 }

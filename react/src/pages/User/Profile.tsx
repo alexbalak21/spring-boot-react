@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import { useUser } from "../../context/UserContext";
+import Avatar from "../../components/Avatar"; // <-- import Avatar
 
 export default function Profile() {
   const { user } = useUser();
@@ -8,7 +9,8 @@ export default function Profile() {
 
   return (
     <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
-      <div className="flex items-center justify-between mb-4">
+
+        <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">User Profile</h2>
         <div className="flex space-x-2">
           <Button
@@ -19,10 +21,26 @@ export default function Profile() {
           </Button>
         </div>
       </div>
+      {/* Avatar at top center */}
+      <div className="flex justify-center mb-6">
+        {user && (
+          <Avatar
+            name={user.name}
+            imageUrl={
+              user.profileImage
+                ? `data:image/png;base64,${user.profileImage}`
+                : undefined
+            }
+            size={64} // <-- bigger size
+            bgColor="bg-gray-400"
+            textColor="text-white"
+          />
+        )}
+      </div>
 
-      {!user && (
-        <p className="text-gray-600">Loading user info...</p>
-      )}
+
+
+      {!user && <p className="text-gray-600">Loading user info...</p>}
 
       {user && (
         <div className="space-y-3">
@@ -36,7 +54,7 @@ export default function Profile() {
           </div>
           <div className="flex gap-4">
             <strong className="w-28 text-gray-700">Role:</strong>
-            <span className="text-gray-900">{user.roles}</span>
+            <span className="text-gray-900">{user.roles.join(", ")}</span>
           </div>
           <div className="flex gap-4">
             <strong className="w-28 text-gray-700">Created:</strong>

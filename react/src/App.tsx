@@ -18,7 +18,7 @@ import { UserIcon, PencilSquareIcon, KeyIcon } from "@heroicons/react/24/outline
 export default function App() {
   const userLinks = [
     { name: "Profile", href: "/profile", icon: UserIcon },
-    { name: "Update Profile", href: "/update-profile", icon: PencilSquareIcon },
+    { name: "Edit Profile", href: "/update-profile", icon: PencilSquareIcon },
     { name: "Update Password", href: "/update-password", icon: KeyIcon },
   ];
 

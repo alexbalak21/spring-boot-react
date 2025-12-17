@@ -62,11 +62,12 @@ export default function ApiDemo() {
           disabled={loading || !csrfReady}
           loading={loading}
         >
-          {loading ? "Sending..." : "Send Message"}
+          {loading ? "Sending..." : "Send"}
         </Button>
       </div>
       {responseText && (
         <pre className="bg-gray-50 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">
+          <span>Response:<br /><br /></span>
           {responseText}
         </pre>
       )}

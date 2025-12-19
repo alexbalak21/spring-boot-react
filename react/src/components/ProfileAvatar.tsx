@@ -39,7 +39,7 @@ export default function ProfileAvatar({ user, onImageSelected } : ProfileAvatarP
                                 ? `data:image/png;base64,${user.profileImage}`
                                 : undefined
                         }
-                        size={64}
+                        size={80}
                         bgColor="bg-gray-400"
                         textColor="text-white"
                     />

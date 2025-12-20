@@ -33,8 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+            FilterChain filterChain) throws ServletException, IOException {
 
         // Skip JWT validation for refresh token endpoint
         if ("/api/auth/refresh-token".equals(request.getRequestURI())) {
@@ -49,38 +48,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String subject = jwtService.extractSubject(jwt); // sub = user ID
 
-        if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
+        try {
+            final String subject = jwtService.extractSubject(jwt);
+
+            if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Long userId = Long.parseLong(subject);
-
-                // Load user details by ID
                 UserDetails userDetails = userDetailsService.loadUserById(userId);
 
-                // Validate token against user ID
                 if (jwtService.validateToken(jwt, userId)) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                    logger.debug("JWT authentication successful for user ID {}", userId);
                 } else {
                     logger.warn("JWT validation failed for user ID {}", userId);
                 }
-            } catch (NumberFormatException e) {
-                // Subject wasn't a valid numeric ID
-                logger.warn("Invalid JWT subject, expected numeric user ID but got: {}", subject);
-            } catch (Exception e) {
-                logger.error("JWT authentication failed", e);
             }
-        }
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            logger.warn("Access token expired");
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setHeader("X-Token-Expired", "true");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"access_token_expired\"}");
+        } catch (Exception e) {
+            logger.error("JWT authentication failed", e);
+            filterChain.doFilter(request, response);
+        }
     }
 }

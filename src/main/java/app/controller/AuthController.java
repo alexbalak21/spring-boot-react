@@ -2,121 +2,117 @@ package app.controller;
 
 import app.dto.LoginRequest;
 import app.dto.RegisterRequest;
-import app.model.User;
-import app.model.UserRole;
-import app.repository.UserRepository;
-import app.security.CustomUserDetails;
-import app.security.JwtService;
+import app.service.AuthService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager,
-            JwtService jwtService,
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
+    // -------------------------
+    // LOGIN
+    // -------------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            var authentication = authenticationManager.authenticate(
-                    new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                            request.getEmail(), request.getPassword()));
+            var result = authService.login(request);
 
-            CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-            String token = jwtService.generateToken(principal);
-            String refreshToken = jwtService.generateRefreshToken(principal.getId());
+            String accessToken = (String) result.get("access_token");
+            String refreshToken = (String) result.get("refresh_token");
 
-            // Wrap both token and user info
-            return ResponseEntity.ok(Map.of(
-                    "access_token", token,
-                    "refresh_token", refreshToken,
-                    "user", new app.dto.UserInfo(principal)));
+            ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .secure(false) // true in production
+                    .path("/api/auth/refresh-token")
+                    .sameSite("Strict")
+                    .maxAge(7 * 24 * 60 * 60)
+                    .build();
 
-        } catch (org.springframework.security.core.AuthenticationException e) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(Map.of(
+                            "access_token", accessToken,
+                            "user", result.get("user")
+                    ));
+
+        } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
     }
 
+    // -------------------------
+    // REGISTER
+    // -------------------------
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        // Check if email already exists
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Email already in use"));
+        try {
+            authService.register(request);
+            return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-
-        // Create new user entity
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(UserRole.USER);
-
-        // Save user
-        userRepository.save(user);
-
-        // Optionally generate JWT immediately after registration
-        // String token = jwtService.generateToken(user);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "User registered successfully"));
     }
 
+    // -------------------------
+    // REFRESH TOKEN
+    // -------------------------
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(
+            @CookieValue(value = "refresh_token", required = false) String refreshToken) {
+
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Refresh token missing"));
+        }
+
+        try {
+            var result = authService.refresh(refreshToken);
+
+            String newAccessToken = result.get("access_token");
+            String newRefreshToken = result.get("refresh_token");
+
+            ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/api/auth/refresh-token")
+                    .sameSite("Strict")
+                    .maxAge(7 * 24 * 60 * 60)
+                    .build();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(Map.of("access_token", newAccessToken));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // -------------------------
+    // LOGOUT
+    // -------------------------
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        // JWT is stateless, so logout is handled client-side by removing the token
-        // Server-side can optionally invalidate token in a blacklist if needed
-        return ResponseEntity.ok(Map.of(
-                "message", "Logged out successfully"));
+        ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/api/auth/refresh-token")
+                .sameSite("Strict")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(Map.of("message", "Logged out successfully"));
     }
-
-    @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
-
-        String refreshToken = request.get("refreshToken");
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            return ResponseEntity.badRequest().body("Refresh token is required");
-        }
-
-        // 1. Validate refresh token
-        if (!jwtService.validateRefreshToken(refreshToken)) {
-            return ResponseEntity.status(401).body("Invalid or expired refresh token");
-        }
-
-        // 2. Extract user ID
-        Long userId = jwtService.getUserIdFromRefreshToken(refreshToken);
-
-        // 3. Load user
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 4. Generate new tokens
-        String newAccessToken = jwtService.generateToken(user);
-        String newRefreshToken = jwtService.generateRefreshToken(user.getId());
-
-        Map<String, String> response = new HashMap<>();
-        response.put("access_token", newAccessToken);
-        response.put("refresh_token", newRefreshToken);
-
-        return ResponseEntity.ok(response);
-    }
-
 }

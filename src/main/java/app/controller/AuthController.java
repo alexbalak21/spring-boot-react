@@ -31,11 +31,12 @@ public class AuthController {
             String accessToken = (String) result.get("access_token");
             String refreshToken = (String) result.get("refresh_token");
 
+            // Correct cookie settings
             ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                     .httpOnly(true)
-                    .secure(false) // true in production
-                    .path("/api/auth/refresh-token")
-                    .sameSite("Strict")
+                    .secure(true)              // works on localhost
+                    .sameSite("None")          // required for cross-site cookies
+                    .path("/api/auth/refresh") // MUST match refresh endpoint
                     .maxAge(7 * 24 * 60 * 60)
                     .build();
 
@@ -67,7 +68,7 @@ public class AuthController {
     // -------------------------
     // REFRESH TOKEN
     // -------------------------
-    @PostMapping("/refresh-token")
+    @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(
             @CookieValue(value = "refresh_token", required = false) String refreshToken) {
 
@@ -81,11 +82,12 @@ public class AuthController {
             String newAccessToken = result.get("access_token");
             String newRefreshToken = result.get("refresh_token");
 
+            // Issue new rotated refresh cookie
             ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken)
                     .httpOnly(true)
-                    .secure(false)
-                    .path("/api/auth/refresh-token")
-                    .sameSite("Strict")
+                    .secure(true)
+                    .sameSite("None")
+                    .path("/api/auth/refresh")
                     .maxAge(7 * 24 * 60 * 60)
                     .build();
 
@@ -105,9 +107,9 @@ public class AuthController {
     public ResponseEntity<?> logout() {
         ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .secure(false)
-                .path("/api/auth/refresh-token")
-                .sameSite("Strict")
+                .secure(true)
+                .sameSite("None")
+                .path("/api/auth/refresh")
                 .maxAge(0)
                 .build();
 

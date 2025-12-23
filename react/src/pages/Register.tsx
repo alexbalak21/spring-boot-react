@@ -1,12 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
-import { useCsrf } from "../hooks/useCsrf";
+import { useCsrf } from "../shared/hooks";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../components/ToastContainer";
-import Button from "../components/Button";
-import Input from "../components/Input";
-
-const REGISTER_URL = "/api/auth/register";
+import { useToast } from "../shared/components/ToastContainer";
+import { Button, Input } from "../shared/components";
+import { register } from "../features/auth";
 
 interface RegisterFormData {
   name: string;
@@ -44,23 +41,11 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(REGISTER_URL, formData, {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        withCredentials: true, // keep cookies (CSRF/session)
-      });
-
+      await register(formData);
       toast.success("Registration successful! Please log in.");
-      console.log("Registration successful:", response.data);
-      // Navigate to login page
       navigate("/login");
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Registration failed. Please try again.";
+      const errorMessage = err?.message || "Registration failed. Please try again.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);

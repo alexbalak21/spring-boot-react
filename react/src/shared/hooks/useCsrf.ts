@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-axios.defaults.withCredentials = true;
-axios.defaults.xsrfCookieName = "XSRF-TOKEN";
-axios.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+import { apiClient } from "../lib";
 
 export function useCsrf() {
   const [csrfReady, setCsrfReady] = useState(false);
@@ -12,7 +8,7 @@ export function useCsrf() {
     const fetchCsrfToken = async () => {
       console.log("[useCsrf] Fetching CSRF token...");
       try {
-        await axios.get("/api/csrf");
+        await apiClient.get("/api/csrf");
         console.log("[useCsrf] CSRF token fetched. Cookie:", document.cookie);
         setCsrfReady(true);
       } catch (err) {

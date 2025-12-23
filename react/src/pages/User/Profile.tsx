@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import Button from "../../components/Button";
-import { useUser } from "../../context/UserContext";
-import EditableField from "../../components/EditableField";
-import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
-import ProfileAvatar from "../../components/ProfileAvatar";
+import { Button, EditableText } from "../../shared/components";
+import { ProfileAvatar } from "../../features/user";
+import { useUser } from "../../features/user";
+import { useAuth } from "../../features/auth";
 
 interface UserDto {
   name?: string;
@@ -11,19 +10,24 @@ interface UserDto {
 }
 
 export default function Profile() {
-  const api = useAuthorizedApi();
+  const { apiClient } = useAuth();
   const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   // Update name/email
   const updateUser = async (payload: UserDto) => {
     try {
-      const response = await api.patch("/user/profile", payload);
-      return response.data;
+      const response = await apiClient("/api/user/profile", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update user");
+      }
+      return response.json();
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message || "Failed to update user";
-      throw new Error(message);
+      throw new Error(err?.message || "Failed to update user");
     }
   };
 
@@ -47,13 +51,19 @@ export default function Profile() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await api.post("/user/profile-image", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await apiClient("/api/user/profile-image", {
+        method: "POST",
+        body: formData,
       });
 
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
       // Backend returns updated user with new profileImage
-      if (response.data) {
-        setUser(response.data);
+      const updatedUser = await response.json();
+      if (updatedUser) {
+        setUser(updatedUser);
       }
     } catch (err) {
       console.error("Image upload failed:", err);
@@ -84,13 +94,13 @@ export default function Profile() {
 
       {user && (
         <div className="space-y-3">
-          <EditableField
+          <EditableText
             label="Name"
             value={user.name}
             onSave={handleSaveName}
           />
 
-          <EditableField
+          <EditableText
             label="Email"
             value={user.email}
             onSave={handleSaveEmail}

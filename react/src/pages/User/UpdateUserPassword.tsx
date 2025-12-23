@@ -1,13 +1,12 @@
 // UpdateUserPassword.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthorizedApi } from '../../hooks/useAuthorizedApi';
-import Button from '../../components/Button';
-import Input from '../../components/Input';
+import { Button, Input } from '../../shared/components';
+import { useAuth } from '../../features/auth';
 
 export default function UpdateUserPassword() {
   const navigate = useNavigate();
-  const api = useAuthorizedApi();
+  const { apiClient } = useAuth();
   
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -37,16 +36,22 @@ export default function UpdateUserPassword() {
 
     try {
       setLoading(true);
-      await api.put('/user/password', {
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
+      const response = await apiClient('/api/user/password', {
+        method: 'PUT',
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        }),
+        headers: { "Content-Type": "application/json" }
       });
-
+      if (!response.ok) {
+        throw new Error('Failed to update password');
+      }
       setSuccess(true);
       // ✅ Redirect immediately after success
       navigate('/user');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update password');
+      setError(err?.message || 'Failed to update password');
     } finally {
       setLoading(false);
     }

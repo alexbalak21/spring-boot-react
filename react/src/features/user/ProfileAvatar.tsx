@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import Avatar from "./Avatar";
+import { Avatar } from "../../shared/components";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import type { UserInfo } from "../types";
+import type { UserInfo } from "./user.types";
 
 interface ProfileAvatarProps { user: UserInfo | null; onImageSelected: (file: File) => void; }
 

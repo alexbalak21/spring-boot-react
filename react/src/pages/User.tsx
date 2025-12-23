@@ -1,10 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
-import { useCsrf } from "../hooks/useCsrf";
-import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
-import { useLogout } from "../hooks/useLogout";
-import Button from "../components/Button";
-
-const USER_URL = "/user"; // baseURL is already set in useAuthorizedApi
+import { useEffect, useState } from "react";
+import { useCsrf } from "../shared/hooks";
+import { useAuth } from "../features/auth";
+import { useLogout } from "../features/auth";
+import { Button } from "../shared/components";
 
 interface UserInfo {
   id: number;
@@ -17,9 +15,7 @@ interface UserInfo {
 
 export default function User() {
   const csrfReady = useCsrf();
-
-  // ✅ Memoize the API client so it doesn't change every render
-  const api = useMemo(() => useAuthorizedApi(), []);
+  const { apiClient } = useAuth();
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,21 +32,16 @@ export default function User() {
     const fetchUser = async () => {
       console.log("[User] Starting API call to /api/user...");
       try {
-        const response = await api.get(USER_URL, {
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          withCredentials: true,
-        });
-        console.log("[User] API call succeeded:", response.data);
-        setUser(response.data);
+        const response = await apiClient("/api/user");
+        if (!response.ok) {
+          throw new Error("Failed to fetch user");
+        }
+        const userData = await response.json();
+        console.log("[User] API call succeeded:", userData);
+        setUser(userData);
       } catch (err: any) {
-        console.error("[User] API call failed:", err.response?.data || err.message);
-        setError(
-          err.response?.data?.message ||
-            err.response?.data?.error ||
-            "Failed to load user info"
-        );
+        console.error("[User] API call failed:", err.message);
+        setError(err.message || "Failed to load user info");
       } finally {
         console.log("[User] API call finished");
         setLoading(false);
@@ -58,7 +49,7 @@ export default function User() {
     };
 
     fetchUser();
-  }, [csrfReady, api]); // ✅ runs only once when csrfReady flips true
+  }, [csrfReady]); // ✅ runs only once when csrfReady flips true
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center py-12">

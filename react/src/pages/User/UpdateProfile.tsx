@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
-import Button from "../../components/Button";
-import Input from "../../components/Input";
-import { useUser } from "../../context/UserContext";
-import UploadProfileImage from "../../components/UploadProfileImage";
+import { Button, Input } from "../../shared/components";
+import { ProfileImageUploader } from "../../features/user";
+import { useUser } from "../../features/user";
+import { useAuth } from "../../features/auth";
 
 export default function UpdateProfile() {
   const navigate = useNavigate();
-  const api = useAuthorizedApi();
-
+  const { apiClient } = useAuth();
   const { user, setUser } = useUser();
 
   const [formData, setFormData] = useState({
@@ -44,8 +42,16 @@ export default function UpdateProfile() {
     setError(null);
 
     try {
-      const response = await api.put("/user/profile", formData);
-      setUser(response.data); // update context with new user info
+      const response = await apiClient("/api/user/profile", {
+        method: "PUT",
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+      const updatedUser = await response.json();
+      setUser(updatedUser);
       setSuccess(true);
 
       // Reset success message after 3 seconds and redirect
@@ -55,7 +61,7 @@ export default function UpdateProfile() {
       }, 3000);
     } catch (err: any) {
       console.error("Update failed:", err);
-      setError(err.response?.data?.message || "Failed to update profile");
+      setError(err?.message || "Failed to update profile");
     } finally {
       setSubmitting(false);
     }
@@ -75,7 +81,7 @@ export default function UpdateProfile() {
   return (
     <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 min-w-100">
       {/* 👇 Upload profile image at the top */}
-      <UploadProfileImage api={api} />
+      <ProfileImageUploader />
 
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Update Profile</h2>

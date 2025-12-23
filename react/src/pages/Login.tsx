@@ -1,14 +1,10 @@
 import { useState } from "react";
-import axios from "axios";
-import { useCsrf } from "../hooks/useCsrf";
-import { useAuth } from "../context/AuthContext";
-import { useUser } from "../context/UserContext";
+import { useCsrf } from "../shared/hooks";
+import { useAuth, login } from "../features/auth";
+import { useUser } from "../features/user";
 import { Link, useNavigate } from "react-router-dom";
-import { useToast } from "../components/ToastContainer";
-import Button from "../components/Button";
-import Input from "../components/Input";
-
-const LOGIN_URL = "/api/auth/login";
+import { useToast } from "../shared/components/ToastContainer";
+import { Button, Input } from "../shared/components";
 
 interface LoginFormData {
   email: string;
@@ -46,30 +42,20 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(LOGIN_URL, formData, {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        withCredentials: true,
-      });
-
-      const access_token = response.data?.access_token;
-      const user = response.data?.user;
+      const data = await login(formData);
+      const access_token = data?.access_token;
+      const user = data?.user;
 
       if (access_token && user) {
         setAccessToken(access_token);
         setUser(user);
         toast.success("Login successful!");
-        navigate("/"); 
+        navigate("/");
       } else {
         setError("No access token or user returned from server");
       }
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Login failed. Please try again.";
+      const errorMessage = err?.message || "Login failed. Please try again.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);

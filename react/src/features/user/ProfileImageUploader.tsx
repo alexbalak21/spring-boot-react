@@ -1,11 +1,8 @@
 import { useState, useRef } from "react";
-import type { AxiosInstance } from "axios";
+import { useAuth } from "../auth";
 
-interface UploadProfileImageProps {
-  api: AxiosInstance;
-}
-
-export default function UploadProfileImage({ api }: UploadProfileImageProps) {
+export default function ProfileImageUploader() {
+  const { apiClient } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -29,12 +26,18 @@ export default function UploadProfileImage({ api }: UploadProfileImageProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await api.post("/user/profile-image", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await apiClient("/api/user/profile-image", {
+        method: "POST",
+        body: formData,
       });
 
-      if (response.data.imageData) {
-        setPreview(response.data.imageData);
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+      if (data.imageData) {
+        setPreview(data.imageData);
       }
 
       setSuccess(true);

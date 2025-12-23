@@ -1,10 +1,9 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Link } from "react-router-dom";
-import Avatar from "./Avatar";
-import Confirm from "./Confirm";
+import { Avatar, Confirm } from "../../shared/components";
 import { useState } from "react";
-import { useLogout } from "../hooks/useLogout";
-import { useUser } from "../context/UserContext";
+import { useLogout } from "../auth";
+import { useUser } from "./UserContext";
 
 export default function UserMenu() {
   const { logout, loading } = useLogout();

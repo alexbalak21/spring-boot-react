@@ -5,8 +5,8 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon, HomeIcon, InformationCircleIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router-dom";
-import { useUser } from "../context/UserContext";
-import UserMenu from "./UserMenu";
+import { useUser } from "../../features/user";
+import { UserMenu } from "../../features/user";
 
 function classNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");

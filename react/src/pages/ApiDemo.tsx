@@ -1,13 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
-import { useCsrf } from "../hooks/useCsrf";
-import Button from "../components/Button";
-import Input from "../components/Input";
-
-// Axios defaults for XSRF and cookies
-axios.defaults.withCredentials = true;
-axios.defaults.xsrfCookieName = "XSRF-TOKEN";
-axios.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+import { useCsrf } from "../shared/hooks";
+import { Button, Input } from "../shared/components";
+import { apiClient } from "../shared/lib";
 
 const API_BASE = "/api/demo";
 
@@ -27,18 +21,12 @@ export default function ApiDemo() {
     setLoading(true);
     setResponseText(null);
     try {
-      const res = await axios.post(API_BASE, { message: input });
-
-      
-      setResponseText(res.data);
-
-      // If backend returns an object like { message: "hello" }:
-      // setResponseText(res.data.message);
-
+      const res = await apiClient.post(`${API_BASE}`, { message: input });
+      const data = await res.json();
+      setResponseText(data);
       setInput("");
     } catch (err: any) {
-      const serverMessage =
-        err?.response?.data?.message || err.message || "Unknown error";
+      const serverMessage = err?.message || "Unknown error";
       setResponseText(`Error: ${serverMessage}`);
     } finally {
       setLoading(false);

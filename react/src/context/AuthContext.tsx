@@ -20,13 +20,9 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log("%c[AuthProvider] RENDER", "color: purple");
-
   const [accessToken, setAccessTokenState] = useState<string | null>(() => {
     try {
-      const stored = localStorage.getItem("access_token");
-      console.log("%c[INIT] Loaded access token:", "color: purple", stored);
-      return stored;
+      return localStorage.getItem("access_token");
     } catch {
       return null;
     }
@@ -35,11 +31,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isRefreshing = useRef(false);
   const refreshSubscribers = useRef<Array<(token: string | null) => void>>([]);
 
+  // Sync token across tabs
   useEffect(() => {
-    console.log("%c[AuthProvider] useEffect(storage listener)", "color: purple");
     const onStorage = (e: StorageEvent) => {
       if (e.key === "access_token") {
-        console.log("%c[STORAGE] access_token changed:", "color: purple", e.newValue);
         setAccessTokenState(e.newValue);
       }
     };
@@ -48,7 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const setAccessToken = (token: string | null) => {
-    console.log("%c[SET TOKEN] New token:", "color: green", token);
     try {
       if (token) localStorage.setItem("access_token", token);
       else localStorage.removeItem("access_token");
@@ -57,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const clearAccessToken = useCallback(() => {
-    console.log("%c[CLEAR TOKEN]", "color: red");
     localStorage.removeItem("access_token");
     setAccessTokenState(null);
   }, []);
@@ -66,44 +59,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // REFRESH TOKEN
   // -----------------------------
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
-    console.log("%c[REFRESH] Called refreshAccessToken()", "color: orange");
-
     if (isRefreshing.current) {
-      console.log("%c[REFRESH] Already refreshing → queue subscriber", "color: orange");
       return new Promise(resolve => {
-        refreshSubscribers.current.push(token => {
-          console.log("%c[REFRESH] Subscriber resolved:", "color: orange", token);
-          resolve(token);
-        });
+        refreshSubscribers.current.push(resolve);
       });
     }
 
     isRefreshing.current = true;
-    console.log("%c[REFRESH] Starting refresh request...", "color: orange");
 
     try {
       const response = await fetch("/api/auth/refresh", {
         method: "POST",
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        }
+        headers: { Accept: "application/json", "Content-Type": "application/json" }
       });
 
-      console.log("%c[REFRESH] Response status:", "color: orange", response.status);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[REFRESH] FAILED:", response.status, errorText);
-        throw new Error("Refresh failed");
+        refreshSubscribers.current.forEach(cb => cb(null));
+        refreshSubscribers.current = [];
+        clearAccessToken();
+        return null;
       }
 
       const data = await response.json();
-      console.log("%c[REFRESH] Response JSON:", "color: orange", data);
-
       const newToken = data.access_token;
-      console.log("%c[REFRESH] New access token:", "color: orange", newToken);
 
       setAccessToken(newToken);
 
@@ -111,14 +90,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       refreshSubscribers.current = [];
 
       return newToken;
-    } catch (err) {
-      console.error("%c[REFRESH] ERROR:", "color: red", err);
+    } catch {
       refreshSubscribers.current.forEach(cb => cb(null));
       refreshSubscribers.current = [];
       clearAccessToken();
       return null;
     } finally {
-      console.log("%c[REFRESH] Finished", "color: orange");
       isRefreshing.current = false;
     }
   }, [clearAccessToken]);
@@ -129,62 +106,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const apiClient = useCallback(
     async (input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> => {
       const url = input.toString();
-      console.log("%c[API] Request started:", "color: cyan", url);
-
       const isPublic = ["/api/auth/refresh", "/api/csrf"].some(p => url.includes(p));
-      console.log("%c[API] Is public endpoint:", "color: cyan", isPublic);
 
-      const makeRequest = async (token: string | null, label: string) => {
-        console.log(`%c[API] makeRequest(${label}) token:`, "color: cyan", token);
-
+      const makeRequest = async (token: string | null) => {
         const headers = new Headers(init.headers);
-        if (token && !isPublic) {
-          headers.set("Authorization", `Bearer ${token}`);
-        }
+        if (token && !isPublic) headers.set("Authorization", `Bearer ${token}`);
 
-        const res = await fetch(url, {
+        return fetch(url, {
           ...init,
           headers,
           credentials: "include"
         });
-
-        console.log(`%c[API] Response (${label}) status:`, "color: cyan", res.status);
-        console.log(
-          `%c[API] Response (${label}) X-Token-Expired:`,
-          "color: cyan",
-          res.headers.get("X-Token-Expired")
-        );
-
-        return res;
       };
 
-      // FIRST ATTEMPT
-      const first = await makeRequest(accessToken, "FIRST");
+      // First attempt
+      let response = await makeRequest(accessToken);
 
-      const expired = first.headers.get("X-Token-Expired") === "true";
-      console.log("%c[API] Token expired?", "color: cyan", expired);
+      const expired = response.headers.get("X-Token-Expired") === "true";
+      if (!expired) return response;
 
-      if (!expired) {
-        console.log("%c[API] Returning FIRST response", "color: cyan");
-        return first;
-      }
-
-      // REFRESH
-      console.log("%c[API] Token expired → refreshing...", "color: yellow");
+      // Refresh
       const newToken = await refreshAccessToken();
-      console.log("%c[API] New token after refresh:", "color: yellow", newToken);
+      if (!newToken) return response;
 
-      if (!newToken) {
-        console.log("%c[API] Refresh failed → throwing", "color: red");
-        throw new Error("Unable to refresh token");
-      }
-
-      // RETRY ONCE
-      console.log("%c[API] Retrying with new token...", "color: yellow");
-      const second = await makeRequest(newToken, "SECOND");
-
-      console.log("%c[API] Returning SECOND response", "color: yellow");
-      return second;
+      // Retry once
+      return makeRequest(newToken);
     },
     [accessToken, refreshAccessToken]
   );

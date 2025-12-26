@@ -1,16 +1,30 @@
 import { useRef, useState } from "react";
-import { Avatar } from "../../shared/components";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { Avatar, Confirm } from "../../shared/components";
+import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { UserInfo } from "./user.types";
 
-interface ProfileAvatarProps { user: UserInfo | null; onImageSelected: (file: File) => void; }
+interface ProfileAvatarProps { user: UserInfo | null; onImageSelected: (file: File) => void; onImageDeleted: () => void; }
 
-export default function ProfileAvatar({ user, onImageSelected } : ProfileAvatarProps) {
+export default function ProfileAvatar({ user, onImageSelected, onImageDeleted } : ProfileAvatarProps) {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
     const selectUploadImage = () => {
         fileInputRef.current?.click();
+    };
+
+    const confirmDelete = () => {
+        setShowConfirmDelete(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        setShowConfirmDelete(false);
+        onImageDeleted();
+    };
+
+    const handleDeleteCancel = () => {
+        setShowConfirmDelete(false);
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +43,7 @@ export default function ProfileAvatar({ user, onImageSelected } : ProfileAvatarP
     };
 
     return (
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-10">
             {user && (
                 <div className="relative group">
                     <Avatar
@@ -50,8 +64,23 @@ export default function ProfileAvatar({ user, onImageSelected } : ProfileAvatarP
                        bg-black/50 rounded-full opacity-0 group-hover:opacity-100 
                        transition"
                     >
-                        <PlusIcon className="h-6 w-6 text-white" />
+                        {user?.profileImage ? (
+                            <PencilSquareIcon className="h-6 w-6 text-white transform" />
+                        ) : (
+                            <PlusIcon className="h-6 w-6 text-white" />
+                        )}
                     </button>
+
+                    {user?.profileImage && (
+                        <button
+                            onClick={confirmDelete}
+                            className="absolute bottom-0 right-0 flex items-center justify-center 
+                           bg-red-500/80 rounded-full p-1 opacity-0 group-hover:opacity-100 
+                           transition"
+                        >
+                            <TrashIcon className="h-4 w-4 text-white" />
+                        </button>
+                    )}
 
                     <input
                         type="file"
@@ -62,8 +91,8 @@ export default function ProfileAvatar({ user, onImageSelected } : ProfileAvatarP
                     />
                 </div>
             )}
-
             {error && <p className="text-red-500 mt-2">{error}</p>}
+            <Confirm open={showConfirmDelete} title="Delete Profile image" message="Do you want to delete your profile image ?" onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} />
         </div>
     );
 }

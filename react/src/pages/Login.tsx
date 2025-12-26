@@ -49,6 +49,7 @@ export default function Login() {
       if (access_token && user) {
         setAccessToken(access_token);
         setUser(user);
+        console.log(user);
         toast.success("Login successful!");
         navigate("/");
       } else {

@@ -3,10 +3,13 @@ package app.controller;
 import app.dto.LoginRequest;
 import app.dto.RegisterRequest;
 import app.service.AuthService;
+import app.service.UserProfileImageService;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import app.dto.UserInfoProfileImage;
 
 import java.util.Map;
 
@@ -15,9 +18,11 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserProfileImageService userProfileImageService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserProfileImageService userProfileImageService) {
         this.authService = authService;
+        this.userProfileImageService = userProfileImageService;
     }
 
     // -------------------------
@@ -30,6 +35,9 @@ public class AuthController {
 
             String accessToken = (String) result.get("access_token");
             String refreshToken = (String) result.get("refresh_token");
+            app.dto.UserInfo userInfo = (app.dto.UserInfo) result.get("user");
+            String profileImage = userProfileImageService.getBase64Image(userInfo.getId());
+            UserInfoProfileImage userInfoProfileImage = new UserInfoProfileImage(userInfo, profileImage);
 
             // Correct cookie settings
             ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
@@ -44,7 +52,7 @@ public class AuthController {
                     .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                     .body(Map.of(
                             "access_token", accessToken,
-                            "user", result.get("user")
+                            "user", userInfoProfileImage
                     ));
 
         } catch (Exception e) {

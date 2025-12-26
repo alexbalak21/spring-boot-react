@@ -5,7 +5,7 @@ export interface UserInfo {
   roles: string[];
   createdAt: string;
   updatedAt: string;
-  profileImage: string;
+  profileImage: string | null;
 }
 
 export interface UserContextType {

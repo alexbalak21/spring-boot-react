@@ -70,6 +70,26 @@ export default function Profile() {
     }
   };
 
+  // ⬇️ NEW: Delete profile image (delegated from ProfileAvatar)
+  const handleProfileImageDelete = async () => {
+    try {
+      const response = await apiClient("/api/user/profile-image", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete image");
+      }
+
+      // Manually update user to remove profileImage
+      if (user) {
+        setUser({ ...user, profileImage: null });
+      }
+    } catch (err) {
+      console.error("Image delete failed:", err);
+    }
+  };
+
   return (
     <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
       <div className="flex items-center justify-between mb-4">
@@ -88,6 +108,7 @@ export default function Profile() {
       <ProfileAvatar
         user={user}
         onImageSelected={handleProfileImageUpload}
+        onImageDeleted={handleProfileImageDelete}
       />
 
       {!user && <p className="text-gray-600">Loading user info...</p>}
